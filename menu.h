@@ -1,5 +1,4 @@
 #pragma once
+#include "headers.h"
 
-#include <Windows.h>
-
-int ProcessMenuMessage(HWND hWnd, WPARAM wParam, LPARAM lParam);
+void ProcessMenuMessage(HWND hWnd, WPARAM wParam, LPARAM lParam);

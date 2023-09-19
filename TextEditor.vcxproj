@@ -111,7 +111,11 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ComDlg32.Lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -131,6 +135,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="appWindow.cpp" />
+    <ClCompile Include="fileUtil.cpp" />
+    <ClCompile Include="fileUtil.h" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="menu.cpp" />
   </ItemGroup>
@@ -139,6 +145,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="appWindow.h" />
+    <ClInclude Include="headers.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="menu.h" />
     <ClInclude Include="resource.h" />

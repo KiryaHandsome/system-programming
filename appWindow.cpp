@@ -1,5 +1,4 @@
 #include "appWindow.h"
-#include "resource.h"
 
 
 WNDCLASSEX CreateMainWindowClass(HINSTANCE hInstance, WNDPROC windowProc) {
@@ -12,7 +11,6 @@ WNDCLASSEX CreateMainWindowClass(HINSTANCE hInstance, WNDPROC windowProc) {
     windowClass.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);
     windowClass.lpszClassName = MAIN_WINDOW_CLASS_NAME;
     windowClass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-
     return windowClass;
 }
 
@@ -27,11 +25,11 @@ HWND CreateMainWindow(HINSTANCE hInstance)
         NULL, NULL, hInstance, NULL);
 }
 
-HWND CreateTextField(HINSTANCE hInstance, HWND parent)
+HWND CreateTextField(HWND parent)
 {
     return CreateWindowEx(
         WS_EX_CLIENTEDGE, L"Edit", L"",
-        WS_BORDER | WS_CHILD | WS_VISIBLE,
+        WS_BORDER | WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL,
         0, 0, TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT,
         parent, NULL, NULL, NULL
     );

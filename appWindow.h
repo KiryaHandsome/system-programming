@@ -1,6 +1,5 @@
 #pragma once
-
-#include <Windows.h>
+#include "headers.h"
 
 // constants 
 static const wchar_t* MAIN_WINDOW_CLASS_NAME = L"MainClassName";
@@ -14,4 +13,4 @@ static const int TEXT_FIELD_HEIGHT = 250;
 //functions
 WNDCLASSEX CreateMainWindowClass(HINSTANCE hInstance, WNDPROC windowProc);
 HWND CreateMainWindow(HINSTANCE hInstance);
-HWND CreateTextField(HINSTANCE hInstance, HWND parent);
+HWND CreateTextField(HWND parent);
