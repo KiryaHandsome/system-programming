@@ -132,6 +132,7 @@
   <ItemGroup>
     <ClCompile Include="appWindow.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="menu.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -139,6 +140,11 @@
   <ItemGroup>
     <ClInclude Include="appWindow.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="menu.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TextEditor.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -13,5 +13,5 @@ static const int TEXT_FIELD_HEIGHT = 250;
 
 //functions
 WNDCLASSEX CreateMainWindowClass(HINSTANCE hInstance, WNDPROC windowProc);
-HWND InstantiateMainWindow(HINSTANCE hInstance);
+HWND CreateMainWindow(HINSTANCE hInstance);
 HWND CreateTextField(HINSTANCE hInstance, HWND parent);

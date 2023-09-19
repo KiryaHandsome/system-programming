@@ -1,4 +1,5 @@
 #include "appWindow.h"
+#include "resource.h"
 
 
 WNDCLASSEX CreateMainWindowClass(HINSTANCE hInstance, WNDPROC windowProc) {
@@ -8,7 +9,7 @@ WNDCLASSEX CreateMainWindowClass(HINSTANCE hInstance, WNDPROC windowProc) {
     windowClass.hInstance = hInstance;
     windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
     windowClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-    windowClass.lpszMenuName = NULL;
+    windowClass.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);
     windowClass.lpszClassName = MAIN_WINDOW_CLASS_NAME;
     windowClass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
@@ -29,7 +30,7 @@ HWND CreateMainWindow(HINSTANCE hInstance)
 HWND CreateTextField(HINSTANCE hInstance, HWND parent)
 {
     return CreateWindowEx(
-        WS_EX_CLIENTEDGE, L"Edit", L"Default message in text field",
+        WS_EX_CLIENTEDGE, L"Edit", L"",
         WS_BORDER | WS_CHILD | WS_VISIBLE,
         0, 0, TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT,
         parent, NULL, NULL, NULL
