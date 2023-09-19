@@ -15,7 +15,7 @@ WNDCLASSEX CreateMainWindowClass(HINSTANCE hInstance, WNDPROC windowProc) {
     return windowClass;
 }
 
-HWND InstantiateMainWindow(HINSTANCE hInstance)
+HWND CreateMainWindow(HINSTANCE hInstance)
 {
     return CreateWindowEx(
         WS_EX_CLIENTEDGE,
@@ -24,4 +24,14 @@ HWND InstantiateMainWindow(HINSTANCE hInstance)
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT,
         NULL, NULL, hInstance, NULL);
+}
+
+HWND CreateTextField(HINSTANCE hInstance, HWND parent)
+{
+    return CreateWindowEx(
+        WS_EX_CLIENTEDGE, L"Edit", L"Default message in text field",
+        WS_BORDER | WS_CHILD | WS_VISIBLE,
+        0, 0, TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT,
+        parent, NULL, NULL, NULL
+    );
 }
