@@ -137,6 +137,8 @@
     <ClCompile Include="appWindow.cpp" />
     <ClCompile Include="fileUtil.cpp" />
     <ClCompile Include="fileUtil.h" />
+    <ClCompile Include="global.cpp" />
+    <ClCompile Include="global.h" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="menu.cpp" />
   </ItemGroup>

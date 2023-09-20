@@ -45,6 +45,9 @@ LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lP
 			MessageBox(NULL, L"Edit control creation failed!", L"Error", MB_ICONERROR);
 			return EXIT_FAILURE;
 		}
+		else {
+			SetWindowTextA(hTextField, "Hello World!");
+		}
 		return 0;
 	}
 	default:

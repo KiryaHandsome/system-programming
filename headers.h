@@ -7,3 +7,4 @@
 #include "resource.h"
 #include "menu.h"
 #include "appWindow.h"
+#include "global.h"

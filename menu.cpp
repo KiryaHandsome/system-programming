@@ -12,13 +12,8 @@ void ProcessMenuMessage(HWND hWnd, WPARAM wParam, LPARAM lParam)
 		break;
 	case ID_FILE_LOAD: {
 		OpenFileDialog(hWnd);
-		ReadDataFromFile("C:\\projects\\osisp\\test.txt");
-		if (cf::BUFFER == NULL) {
-			MessageBoxA(hWnd, "Error occured while reading data from file", "Error", MB_ICONERROR);
-		}
-		else {
-			SetWindowTextA(hTextField, cf::BUFFER);
-		}
+		ReadDataFromFile(FILENAME);
+		SetWindowTextA(hTextField, BUFFER);
 		break;
 	}
 	case ID_ABOUT:

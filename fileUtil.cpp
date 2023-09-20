@@ -21,7 +21,7 @@ void OpenFileDialog(HWND hWnd)
 	// Display the Open dialog box. 
 	if (GetOpenFileNameA(&openFileName) == TRUE) {
 		OutputDebugStringA(filename);
-		strcpy_s(cf::FILENAME, 256, filename);
+		strcpy_s(FILENAME, 256, filename);
 	}
 	else {
 		MessageBoxA(hWnd, "Error occurred while choose of file", "Error", MB_ICONERROR);
@@ -37,7 +37,7 @@ void ReadDataFromFile(LPCSTR filename)
 	}
 
 	DWORD bytesRead;
-	if (!ReadFile(hFile, cf::BUFFER, cf::BUFFER_SIZE, &bytesRead, NULL)) {
+	if (!ReadFile(hFile, BUFFER, BUFFER_SIZE, &bytesRead, NULL)) {
 		OutputDebugStringA("Error reading from the file.");
 		CloseHandle(hFile);
 		return;
