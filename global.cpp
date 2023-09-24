@@ -5,10 +5,12 @@ HWND hMainWindow{};
 
 bool contentAlreadyChanged = false;
 
+int fontSize = 18;
+std::string font = "Times New Roman";
+
 const wchar_t DEFAULT_FILENAME[] = L"Untitled.txt";
 wchar_t WINDOW_TITLE_POSTFIX[] = L" - HandsomeEditor";
 wchar_t FILE_PATH[FILE_PATH_BUFFER_SIZE];
-
 
 // constants 
 const wchar_t MAIN_WINDOW_CLASS_NAME[] = L"MainClassName";

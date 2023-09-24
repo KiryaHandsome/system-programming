@@ -2,11 +2,14 @@
 #define GLOBALS_H
 
 #include <Windows.h>
+#include <string>
 
 
 extern HWND hTextField;
 extern HWND hMainWindow;
 extern bool contentAlreadyChanged;
+extern int fontSize;
+extern std::string font;
 
 #define FILE_PATH_BUFFER_SIZE 256
 #define BUFFER_SIZE 64000

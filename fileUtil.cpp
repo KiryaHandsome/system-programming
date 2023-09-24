@@ -1,7 +1,7 @@
 #include "fileUtil.h"
 
 
-void OpenFileDialog(HWND hWnd)
+bool OpenFileDialog(HWND hWnd)
 {
 	OPENFILENAME openFileName{};
 
@@ -22,9 +22,11 @@ void OpenFileDialog(HWND hWnd)
 	// Display the Open dialog box. 
 	if (GetOpenFileName(&openFileName) == TRUE) {
 		wcscpy_s(FILE_PATH, FILE_PATH_BUFFER_SIZE, filename);
+		return true;
 	}
 	else {
 		MessageBoxA(hWnd, "Error occurred while choose of file", "Error", MB_ICONERROR);
+		return false;
 	}
 }
 

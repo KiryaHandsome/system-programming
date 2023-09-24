@@ -52,12 +52,13 @@ LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lP
 			MessageBox(NULL, L"Edit control creation failed!", L"Error", MB_ICONERROR);
 			return EXIT_FAILURE;
 		}
+		UpdateFont();
 		return 0;
 	}
 	case WM_SIZE: {
 		int newWidth = LOWORD(lParam);
 		int newHeight = HIWORD(lParam);
-		MoveWindow(hTextField, 10, 10, newWidth - 20, newHeight - 20, TRUE);
+		MoveWindow(hTextField, 0, 0, newWidth, newHeight, TRUE);
 	}
 	default:
 		return DefWindowProc(hWindow, message, wParam, lParam);

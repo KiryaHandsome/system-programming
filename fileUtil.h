@@ -2,7 +2,7 @@
 
 #include "headers.h"
 
-void OpenFileDialog(HWND hWnd);
+bool OpenFileDialog(HWND hWnd);
 
 /*
 	Reads data from passed file and set it to text field
