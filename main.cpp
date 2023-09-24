@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include "main.h"
+#include <string>
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR szCmdLine, int nCmdShow)
 {
@@ -9,7 +10,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR szCmdLine, int nCmdSho
 		return EXIT_FAILURE;
 	}
 
-	HWND hMainWindow = CreateMainWindow(hInstance);
+	hMainWindow = CreateMainWindow(hInstance);
 	if (hMainWindow == NULL) {
 		MessageBox(NULL, L"Window Creation Failed!", L"Error!", MB_ICONEXCLAMATION | MB_OK);
 		return EXIT_FAILURE;
@@ -30,9 +31,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR szCmdLine, int nCmdSho
 LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message) {
-	case WM_COMMAND:
-		ProcessMenuMessage(hWindow, wParam, lParam);
+	case WM_COMMAND: {
+		if (!contentAlreadyChanged and IsTextFieldChanged(wParam, lParam)) {
+			AppendAsteriskToFilename();
+		}
+		else {
+			ProcessWMCommand(hWindow, wParam, lParam);
+		}
 		return 0;
+	}
 	case WM_CLOSE:
 		DestroyWindow(hWindow);
 		return 0;
@@ -45,10 +52,12 @@ LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lP
 			MessageBox(NULL, L"Edit control creation failed!", L"Error", MB_ICONERROR);
 			return EXIT_FAILURE;
 		}
-		else {
-			SetWindowTextA(hTextField, "Hello World!");
-		}
 		return 0;
+	}
+	case WM_SIZE: {
+		int newWidth = LOWORD(lParam);
+		int newHeight = HIWORD(lParam);
+		MoveWindow(hTextField, 10, 10, newWidth - 20, newHeight - 20, TRUE);
 	}
 	default:
 		return DefWindowProc(hWindow, message, wParam, lParam);

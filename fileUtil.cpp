@@ -3,9 +3,9 @@
 
 void OpenFileDialog(HWND hWnd)
 {
-	OPENFILENAMEA openFileName{};
+	OPENFILENAME openFileName{};
 
-	char filename[256] = { L'\0' };
+	wchar_t filename[FILE_PATH_BUFFER_SIZE] = { '\0' };
 
 	// Initialize OPENFILENAME
 	ZeroMemory(&openFileName, sizeof(openFileName));
@@ -14,33 +14,50 @@ void OpenFileDialog(HWND hWnd)
 	openFileName.lpstrFile = filename;
 	openFileName.lpstrFile[0] = '\0';
 	openFileName.nMaxFile = 256;
-	openFileName.lpstrFilter = "All files\0*.*\0Cpp files\0*.cpp\0";
+	openFileName.lpstrFilter = L"All files\0*.*\0";
 	openFileName.nFilterIndex = 1;
 	openFileName.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+	openFileName.lpstrInitialDir = FILE_PATH;
 
 	// Display the Open dialog box. 
-	if (GetOpenFileNameA(&openFileName) == TRUE) {
-		OutputDebugStringA(filename);
-		strcpy_s(FILENAME, 256, filename);
+	if (GetOpenFileName(&openFileName) == TRUE) {
+		wcscpy_s(FILE_PATH, FILE_PATH_BUFFER_SIZE, filename);
 	}
 	else {
 		MessageBoxA(hWnd, "Error occurred while choose of file", "Error", MB_ICONERROR);
 	}
 }
 
-void ReadDataFromFile(LPCSTR filename)
+void ReadDataFromFile(wchar_t filePath[])
 {
-	HANDLE hFile = CreateFileA(filename, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE hFile = CreateFile(filePath, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE) {
 		OutputDebugStringA("Error occured while opening the file");
 		return;
 	}
 
-	DWORD bytesRead;
-	if (!ReadFile(hFile, BUFFER, BUFFER_SIZE, &bytesRead, NULL)) {
+	DWORD fileSize = GetFileSize(hFile, NULL);
+	char* contentArray = new char[fileSize + 1]; // +1 for null terminator
+	DWORD bytesRead = 0;
+	if (!ReadFile(hFile, contentArray, fileSize, &bytesRead, NULL)) {
 		OutputDebugStringA("Error reading from the file.");
-		CloseHandle(hFile);
-		return;
 	}
+	contentArray[bytesRead] = '\0';
+	SetWindowTextA(hTextField, contentArray);
+	delete[] contentArray;
 	CloseHandle(hFile);
+}
+
+void SaveDataFromTextFieldToFile(wchar_t filePath[])
+{
+	HANDLE FileToSave = CreateFile(filePath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	int saveLength = GetWindowTextLength(hTextField) + 1;
+	char* data = new char[saveLength];
+	saveLength = GetWindowTextA(hTextField, data, saveLength);
+	DWORD bytesWritten;
+	if (!WriteFile(FileToSave, data, saveLength, &bytesWritten, NULL)) {
+		OutputDebugStringA("Error when writing to the file.");
+	}
+	CloseHandle(FileToSave);
+	delete[] data;
 }

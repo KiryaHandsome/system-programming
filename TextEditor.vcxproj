@@ -111,7 +111,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ComDlg32.Lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ComDlg32.Lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ProjectReference>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
@@ -140,7 +140,7 @@
     <ClCompile Include="global.cpp" />
     <ClCompile Include="global.h" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="menu.cpp" />
+    <ClCompile Include="actions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -149,7 +149,7 @@
     <ClInclude Include="appWindow.h" />
     <ClInclude Include="headers.h" />
     <ClInclude Include="main.h" />
-    <ClInclude Include="menu.h" />
+    <ClInclude Include="actions.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

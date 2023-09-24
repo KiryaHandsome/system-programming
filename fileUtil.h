@@ -2,14 +2,11 @@
 
 #include "headers.h"
 
-// current file
-static wchar_t* currentFileName = new wchar_t[256] {'\0'};
-static char* currentFileBufferData = NULL;
-
 void OpenFileDialog(HWND hWnd);
 
 /*
-	Reads data from passed file.
-	If something went wrong it returns null, otherwise - data from file.
+	Reads data from passed file and set it to text field
 */
-void ReadDataFromFile(LPCSTR filename);
+void ReadDataFromFile(wchar_t filePath[]);
+
+void SaveDataFromTextFieldToFile(wchar_t filePath[]);

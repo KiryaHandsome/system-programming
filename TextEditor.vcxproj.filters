@@ -21,7 +21,7 @@
     <ClCompile Include="appWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="menu.cpp">
+    <ClCompile Include="actions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="fileUtil.h">
@@ -50,7 +50,7 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="menu.h">
+    <ClInclude Include="actions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="headers.h">

@@ -5,6 +5,7 @@
 #include "fileUtil.h"
 #include "main.h"
 #include "resource.h"
-#include "menu.h"
+#include "actions.h"
 #include "appWindow.h"
 #include "global.h"
+#include "shlwapi.h"
