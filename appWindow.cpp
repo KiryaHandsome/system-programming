@@ -29,10 +29,15 @@ HWND CreateMainWindow(HINSTANCE hInstance)
 
 HWND CreateTextField(HWND parent)
 {
+	LoadLibrary(TEXT("Msftedit.dll"));
+	charFormat.cbSize = sizeof(CHARFORMAT);
+	charFormat.yHeight = fontSize * 20;
+	charFormat.crTextColor = fontColor;
+	charFormat.dwMask = CFM_COLOR | CFM_SIZE | CFM_FACE;
 	return CreateWindowEx(
 		WS_EX_CLIENTEDGE,
-		L"Edit", L"",
-		WS_BORDER | WS_CHILD | WS_VISIBLE | ES_MULTILINE | WS_VSCROLL | ES_AUTOHSCROLL,
+		MSFTEDIT_CLASS, L"",
+		WS_BORDER | WS_CHILD | WS_VISIBLE | ES_MULTILINE | WS_VSCROLL | WS_TABSTOP,
 		0, 0, TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT,
 		parent, NULL, NULL, NULL
 	);
@@ -40,7 +45,11 @@ HWND CreateTextField(HWND parent)
 
 bool IsTextFieldChanged(WPARAM wParam, LPARAM lParam)
 {
-	return HIWORD(wParam) == EN_CHANGE and (HWND)lParam == hTextField;
+	bool r1 = HIWORD(wParam) == EN_CHANGE;
+	bool r2 = (HWND)lParam == hTextField;
+	OutputDebugStringA(std::to_string(r1).c_str());
+	OutputDebugStringA(std::to_string(r2).c_str());
+	return r1 and r2;
 }
 
 void AppendAsteriskToFilename()
@@ -48,10 +57,13 @@ void AppendAsteriskToFilename()
 	int titleLength = GetWindowTextLength(hMainWindow);
 	std::wstring windowTitle(titleLength + 1, '\0');
 	GetWindowText(hMainWindow, &windowTitle[0], titleLength + 1);
-	size_t pos = windowTitle.find(WINDOW_TITLE_POSTFIX);
-	windowTitle.insert(pos, L"*");
-	SetWindowText(hMainWindow, windowTitle.c_str());
-	contentAlreadyChanged = true;
+	int pos = windowTitle.find(WINDOW_TITLE_POSTFIX);
+	if (pos != -1) {
+		windowTitle.insert(pos, L"*");
+		SetWindowText(hMainWindow, windowTitle.c_str());
+		contentAlreadyChanged = true;
+	}
+
 }
 
 void RemoveAsteriskFromFilename()

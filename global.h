@@ -1,8 +1,10 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include "headers.h"
 #include <Windows.h>
 #include <string>
+#include <richedit.h>
 
 
 extern HWND hTextField;
@@ -10,6 +12,8 @@ extern HWND hMainWindow;
 extern bool contentAlreadyChanged;
 extern int fontSize;
 extern std::string font;
+extern COLORREF fontColor;
+extern CHARFORMAT charFormat;
 
 #define FILE_PATH_BUFFER_SIZE 256
 #define BUFFER_SIZE 64000

@@ -8,7 +8,7 @@ void ProcessWMCommand(HWND hWnd, WPARAM wParam, LPARAM lParam)
 	case ID_FONT_ARIAL:
 	case ID_FONT_COURIERNEW:
 	case ID_FONT_CALIBRI: {
-		font = ProccessFont(LOWORD(wParam));
+		font = PickFont(LOWORD(wParam));
 		UpdateFont();
 		break;
 	}
@@ -17,10 +17,14 @@ void ProcessWMCommand(HWND hWnd, WPARAM wParam, LPARAM lParam)
 	case ID_FONTSIZE_22:
 	case ID_FONTSIZE_28:
 	case ID_FONTSIZE_32: {
-		fontSize = ProccessFontSize(LOWORD(wParam));
+		fontSize = PickFontSize(LOWORD(wParam));
 		UpdateFont();
 		break;
 	}
+	case ID_FORMAT_FONTCOLOR: {
+		ChooseFontColor(hWnd);
+		break;
+	}	
 	case ID_FILE_SAVE:
 		SaveFile(hWnd);
 		break;
@@ -54,20 +58,18 @@ void LoadFile(HWND hWnd)
 	ReadDataFromFile(FILE_PATH);
 	std::wstring filename = std::wstring(PathFindFileName(FILE_PATH)) + WINDOW_TITLE_POSTFIX;
 	SetWindowText(hMainWindow, filename.c_str());
+	contentAlreadyChanged = false;
 }
 
 void UpdateFont()
 {
-	HFONT hFont = CreateFontA(
-		fontSize, 0, 0, 0, FW_NORMAL,
-		FALSE, FALSE, FALSE, DEFAULT_CHARSET,
-		OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-		DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
-		font.c_str());
-	SendMessage(hTextField, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
+	charFormat.yHeight = fontSize * 20;
+	lstrcpy(charFormat.szFaceName, std::wstring(font.begin(), font.end()).c_str());
+	charFormat.crTextColor = fontColor;
+	SendMessage(hTextField, EM_SETCHARFORMAT, SCF_ALL, (LPARAM)&charFormat);
 }
 
-std::string ProccessFont(int cellId)
+std::string PickFont(int cellId)
 {
 	switch (cellId) {
 	case ID_FONT_TIMESNEWROMAN: return "Times New Roman";
@@ -79,7 +81,7 @@ std::string ProccessFont(int cellId)
 	}
 }
 
-int ProccessFontSize(int cellId)
+int PickFontSize(int cellId)
 {
 	switch (cellId) {
 	case ID_FONTSIZE_18: return 18;
@@ -88,5 +90,20 @@ int ProccessFontSize(int cellId)
 	case ID_FONTSIZE_28: return 28;
 	case ID_FONTSIZE_32: return 32;
 	default: return 18;
+	}
+}
+
+void ChooseFontColor(HWND hWnd)
+{
+	static COLORREF customColors[16];
+	CHOOSECOLOR cc{ };
+	cc.lStructSize = sizeof(CHOOSECOLOR);
+	cc.hwndOwner = hWnd;
+	cc.lpCustColors = customColors; // Set custom color array
+	cc.rgbResult = fontColor; // Initial color
+	cc.Flags = CC_FULLOPEN | CC_RGBINIT;
+	if (ChooseColor(&cc)) {
+		charFormat.crTextColor = fontColor = cc.rgbResult;
+		SendMessage(hTextField, EM_SETCHARFORMAT, SCF_ALL, (LPARAM)&charFormat);
 	}
 }

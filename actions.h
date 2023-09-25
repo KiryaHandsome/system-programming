@@ -10,6 +10,8 @@ void LoadFile(HWND hWnd);
 
 void UpdateFont();
 
-std::string ProccessFont(int cellId);
+std::string PickFont(int cellId);
 
-int ProccessFontSize(int cellId);
+int PickFontSize(int cellId);
+
+void ChooseFontColor(HWND hWnd);

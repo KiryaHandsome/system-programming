@@ -7,6 +7,8 @@ bool contentAlreadyChanged = false;
 
 int fontSize = 18;
 std::string font = "Times New Roman";
+COLORREF fontColor = RGB(0, 0, 0);
+CHARFORMAT charFormat{ 0 };
 
 const wchar_t DEFAULT_FILENAME[] = L"Untitled.txt";
 wchar_t WINDOW_TITLE_POSTFIX[] = L" - HandsomeEditor";

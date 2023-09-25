@@ -5,7 +5,7 @@
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR szCmdLine, int nCmdShow)
 {
 	WNDCLASSEX windowClass = CreateMainWindowClass(hInstance, WindowProc);
-	if (!RegisterClassEx(&windowClass)) {
+	if (not RegisterClassEx(&windowClass)) {
 		MessageBox(NULL, L"Window Registration Failed!", L"Error!", MB_ICONEXCLAMATION | MB_OK);
 		return EXIT_FAILURE;
 	}
@@ -15,6 +15,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR szCmdLine, int nCmdSho
 		MessageBox(NULL, L"Window Creation Failed!", L"Error!", MB_ICONEXCLAMATION | MB_OK);
 		return EXIT_FAILURE;
 	}
+	HICON hSmallIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
+	SendMessage(hMainWindow, WM_SETICON, ICON_SMALL, (LPARAM)hSmallIcon);
+
 
 	ShowWindow(hMainWindow, nCmdShow);
 	UpdateWindow(hMainWindow);
@@ -32,12 +35,10 @@ LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lP
 {
 	switch (message) {
 	case WM_COMMAND: {
-		if (!contentAlreadyChanged and IsTextFieldChanged(wParam, lParam)) {
+		if (not contentAlreadyChanged and IsTextFieldChanged(wParam, lParam))
 			AppendAsteriskToFilename();
-		}
-		else {
+		else
 			ProcessWMCommand(hWindow, wParam, lParam);
-		}
 		return 0;
 	}
 	case WM_CLOSE:
@@ -52,6 +53,7 @@ LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lP
 			MessageBox(NULL, L"Edit control creation failed!", L"Error", MB_ICONERROR);
 			return EXIT_FAILURE;
 		}
+		SendMessage(hTextField, EM_SETEVENTMASK, 0, ENM_CHANGE);
 		UpdateFont();
 		return 0;
 	}
@@ -59,6 +61,7 @@ LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lP
 		int newWidth = LOWORD(lParam);
 		int newHeight = HIWORD(lParam);
 		MoveWindow(hTextField, 0, 0, newWidth, newHeight, TRUE);
+		break;
 	}
 	default:
 		return DefWindowProc(hWindow, message, wParam, lParam);
