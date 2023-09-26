@@ -42,6 +42,9 @@ LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lP
 		return 0;
 	}
 	case WM_CLOSE:
+		if (contentAlreadyChanged and MessageBox(hWindow, L"Do you want to save your changes?", L"Attention", MB_YESNO) == IDYES) {
+			SaveFile(hWindow);
+		}
 		DestroyWindow(hWindow);
 		return 0;
 	case WM_DESTROY:
