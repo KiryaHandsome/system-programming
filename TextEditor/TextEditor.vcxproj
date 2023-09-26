@@ -148,7 +148,6 @@
   <ItemGroup>
     <ClInclude Include="appWindow.h" />
     <ClInclude Include="headers.h" />
-    <ClInclude Include="main.h" />
     <ClInclude Include="actions.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>

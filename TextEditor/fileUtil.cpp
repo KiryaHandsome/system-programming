@@ -14,7 +14,7 @@ bool OpenFileDialog(HWND hWnd)
 	openFileName.lpstrFile = filename;
 	openFileName.lpstrFile[0] = '\0';
 	openFileName.nMaxFile = 256;
-	openFileName.lpstrFilter = L"All files\0*.*\0";
+	openFileName.lpstrFilter = L"Text files (.txt)\0*.txt\0All files\0*.*\0";
 	openFileName.nFilterIndex = 1;
 	openFileName.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 	openFileName.lpstrInitialDir = FILE_PATH;
@@ -62,4 +62,25 @@ void SaveDataFromTextFieldToFile(wchar_t filePath[])
 	}
 	CloseHandle(FileToSave);
 	delete[] data;
+}
+
+void SaveFile(HWND hWnd)
+{
+	if (!OpenFileDialog(hWnd))
+		return;
+	SaveDataFromTextFieldToFile(FILE_PATH);
+	RemoveAsteriskFromFilename();
+	contentAlreadyChanged = false;
+	std::wstring filename = std::wstring(PathFindFileName(FILE_PATH)) + WINDOW_TITLE_POSTFIX;
+	SetWindowText(hMainWindow, filename.c_str());
+}
+
+void LoadFile(HWND hWnd)
+{
+	if (!OpenFileDialog(hWnd))
+		return;
+	ReadDataFromFile(FILE_PATH);
+	std::wstring filename = std::wstring(PathFindFileName(FILE_PATH)) + WINDOW_TITLE_POSTFIX;
+	SetWindowText(hMainWindow, filename.c_str());
+	contentAlreadyChanged = false;
 }

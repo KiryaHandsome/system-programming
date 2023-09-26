@@ -10,3 +10,8 @@ bool OpenFileDialog(HWND hWnd);
 void ReadDataFromFile(wchar_t filePath[]);
 
 void SaveDataFromTextFieldToFile(wchar_t filePath[]);
+
+void SaveFile(HWND hWnd);
+
+void LoadFile(HWND hWnd);
+

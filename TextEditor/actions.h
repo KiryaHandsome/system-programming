@@ -4,10 +4,6 @@
 
 void ProcessWMCommand(HWND hWnd, WPARAM wParam, LPARAM lParam);
 
-void SaveFile(HWND hWnd);
-
-void LoadFile(HWND hWnd);
-
 void UpdateFont();
 
 std::string PickFont(int cellId);

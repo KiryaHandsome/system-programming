@@ -45,11 +45,9 @@ HWND CreateTextField(HWND parent)
 
 bool IsTextFieldChanged(WPARAM wParam, LPARAM lParam)
 {
-	bool r1 = HIWORD(wParam) == EN_CHANGE;
-	bool r2 = (HWND)lParam == hTextField;
-	OutputDebugStringA(std::to_string(r1).c_str());
-	OutputDebugStringA(std::to_string(r2).c_str());
-	return r1 and r2;
+	bool isChangeEvent = HIWORD(wParam) == EN_CHANGE;
+	bool isTextField = (HWND)lParam == hTextField;
+	return isChangeEvent and isTextField;
 }
 
 void AppendAsteriskToFilename()

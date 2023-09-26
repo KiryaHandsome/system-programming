@@ -12,6 +12,8 @@ void ProcessWMCommand(HWND hWnd, WPARAM wParam, LPARAM lParam)
 		UpdateFont();
 		break;
 	}
+	case ID_FONTSIZE_12:
+	case ID_FONTSIZE_14:
 	case ID_FONTSIZE_18:
 	case ID_FONTSIZE_20:
 	case ID_FONTSIZE_22:
@@ -33,36 +35,18 @@ void ProcessWMCommand(HWND hWnd, WPARAM wParam, LPARAM lParam)
 		SaveFile(hWnd);
 		break;
 	case ID_FILE_LOAD:
+		if (contentAlreadyChanged and MessageBox(hWnd, L"Do you want to save your changes?", L"Attention", MB_YESNO) == IDYES) {
+			SaveFile(hWnd);
+		}
 		LoadFile(hWnd);
 		break;
 	case ID_ABOUT:
-		MessageBoxA(hWnd, "Text about application and developer", "About", MB_OK);
+		MessageBoxA(hWnd, "Text editor created by Kiryl Pryhozhy. \nGroup ¹153504\n\n© Handsome Inc.", "About", MB_OK);
 		break;
 	case ID_EXIT:
 		PostQuitMessage(0);
 		break;
 	}
-}
-
-void SaveFile(HWND hWnd)
-{
-	if (!OpenFileDialog(hWnd))
-		return;
-	SaveDataFromTextFieldToFile(FILE_PATH);
-	RemoveAsteriskFromFilename();
-	contentAlreadyChanged = false;
-	std::wstring filename = std::wstring(PathFindFileName(FILE_PATH)) + WINDOW_TITLE_POSTFIX;
-	SetWindowText(hMainWindow, filename.c_str());
-}
-
-void LoadFile(HWND hWnd)
-{
-	if (!OpenFileDialog(hWnd))
-		return;
-	ReadDataFromFile(FILE_PATH);
-	std::wstring filename = std::wstring(PathFindFileName(FILE_PATH)) + WINDOW_TITLE_POSTFIX;
-	SetWindowText(hMainWindow, filename.c_str());
-	contentAlreadyChanged = false;
 }
 
 void UpdateFont()
@@ -88,6 +72,8 @@ std::string PickFont(int cellId)
 int PickFontSize(int cellId)
 {
 	switch (cellId) {
+	case ID_FONTSIZE_12: return 12;
+	case ID_FONTSIZE_14: return 14;
 	case ID_FONTSIZE_18: return 18;
 	case ID_FONTSIZE_20: return 20;
 	case ID_FONTSIZE_22: return 22;
