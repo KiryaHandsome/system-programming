@@ -156,7 +156,7 @@
     <ResourceCompile Include="TextEditor.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\Users\kiril\Downloads\text_editor_icon.ico" />
+    <Image Include="..\..\..\..\Users\kiril\Downloads\text_editor_icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

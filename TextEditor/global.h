@@ -13,7 +13,9 @@ extern bool contentAlreadyChanged;
 extern int fontSize;
 extern std::string font;
 extern COLORREF fontColor;
+extern COLORREF backgroundColor;
 extern CHARFORMAT charFormat;
+
 
 #define FILE_PATH_BUFFER_SIZE 256
 #define BUFFER_SIZE 64000

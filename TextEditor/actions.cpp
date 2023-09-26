@@ -24,7 +24,11 @@ void ProcessWMCommand(HWND hWnd, WPARAM wParam, LPARAM lParam)
 	case ID_FORMAT_FONTCOLOR: {
 		ChooseFontColor(hWnd);
 		break;
-	}	
+	}
+	case ID_FORMAT_BACKGROUNDCOLOR: {
+		ChooseBackgroundColor(hWnd);
+		break;
+	}
 	case ID_FILE_SAVE:
 		SaveFile(hWnd);
 		break;
@@ -95,15 +99,30 @@ int PickFontSize(int cellId)
 
 void ChooseFontColor(HWND hWnd)
 {
+	CHOOSECOLOR chooseColor = ConfigureChooseColor(hWnd, fontColor);
+	if (ChooseColor(&chooseColor)) {
+		charFormat.crTextColor = fontColor = chooseColor.rgbResult;
+	}
+	SendMessage(hTextField, EM_SETCHARFORMAT, SCF_ALL, (LPARAM)&charFormat);
+}
+
+void ChooseBackgroundColor(HWND hWnd)
+{
+	CHOOSECOLOR chooseColor = ConfigureChooseColor(hWnd, backgroundColor);
+	if (ChooseColor(&chooseColor)) {
+		backgroundColor = chooseColor.rgbResult;
+	}
+	SendMessage(hTextField, EM_SETBKGNDCOLOR, 0, backgroundColor);
+}
+
+CHOOSECOLOR ConfigureChooseColor(HWND hWnd, COLORREF initialColor)
+{
 	static COLORREF customColors[16];
 	CHOOSECOLOR cc{ };
 	cc.lStructSize = sizeof(CHOOSECOLOR);
 	cc.hwndOwner = hWnd;
-	cc.lpCustColors = customColors; // Set custom color array
-	cc.rgbResult = fontColor; // Initial color
+	cc.lpCustColors = customColors;
+	cc.rgbResult = initialColor;
 	cc.Flags = CC_FULLOPEN | CC_RGBINIT;
-	if (ChooseColor(&cc)) {
-		charFormat.crTextColor = fontColor = cc.rgbResult;
-		SendMessage(hTextField, EM_SETCHARFORMAT, SCF_ALL, (LPARAM)&charFormat);
-	}
+	return cc;
 }
