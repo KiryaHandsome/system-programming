@@ -8,7 +8,7 @@ bool contentAlreadyChanged = false;
 int fontSize = 18;
 std::string font = "Times New Roman";
 COLORREF fontColor = RGB(0, 0, 0);
-COLORREF backgroundColor = RGB(255, 255, 255);
+COLORREF backgroundColor = RGB(100, 100, 100);
 CHARFORMAT charFormat{ 0 };
 
 const wchar_t DEFAULT_FILENAME[] = L"Untitled.txt";

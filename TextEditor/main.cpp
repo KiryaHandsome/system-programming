@@ -60,6 +60,8 @@ LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lP
 		}
 		SendMessage(hTextField, EM_SETEVENTMASK, 0, ENM_CHANGE);
 		UpdateFont();
+	
+		SendMessage(hTextField, EM_SETBKGNDCOLOR, 0, backgroundColor);
 		return 0;
 	}
 	case WM_SIZE: {
