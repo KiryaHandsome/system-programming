@@ -1,5 +1,5 @@
 #include "main.h"
-#include <vector>
+#include <thread>
 
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR szCmdLine, int nCmdShow)
@@ -56,9 +56,11 @@ LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lP
 		switch (LOWORD(wParam)) {
 		case IDC_ARCHIVE_BUTTON: {
 			bool isPicked = PickFolder();
-
-			// todo: archive picked folder 
-
+			if (isPicked) {
+				std::wstring folderPath(selectedFolder);
+				std::wstring zipFilePath = std::wstring(selectedFolder).append(L".zip");
+				AddFolderToZip(folderPath.c_str(), zipFilePath.c_str());
+			}
 			break;
 		}
 		case IDC_EXTRACT_BUTTON:
@@ -106,101 +108,6 @@ HWND InstantiateMainWindow(HINSTANCE hInstance)
 	);
 }
 
-std::string BrowseFolder(std::string saved_path)
-{
-	HRESULT hr = CoInitialize(NULL);
-	if (FAILED(hr)) {
-		return "";
-	}
-
-	// Create an instance of IFileDialog
-	IFileOpenDialog* pfd;
-	hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd));
-	if (FAILED(hr)) {
-		CoUninitialize();
-		return "";
-	}
-
-	// Set options for the file dialog to allow picking both files and folders
-	DWORD dwOptions;
-	pfd->GetOptions(&dwOptions);
-	pfd->SetOptions(dwOptions | FOS_PICKFOLDERS);
-
-	// Show the file dialog
-	hr = pfd->Show(NULL);
-	if (SUCCEEDED(hr)) {
-		// Get the selected items
-		IShellItemArray* pItems;
-		hr = pfd->GetResults(&pItems);
-		if (SUCCEEDED(hr)) {
-			DWORD itemCount;
-			pItems->GetCount(&itemCount);
-
-			std::vector<PWSTR> selectedPaths;
-			for (DWORD i = 0; i < itemCount; ++i) {
-				IShellItem* pItem;
-				pItems->GetItemAt(i, &pItem);
-
-				PWSTR pszPath;
-				hr = pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszPath);
-				if (SUCCEEDED(hr)) {
-					selectedPaths.push_back(pszPath);
-				}
-
-				pItem->Release();
-			}
-
-			// Release the item array
-			pItems->Release();
-
-			// Output selected paths
-			if (!selectedPaths.empty()) {
-				OutputDebugStringA("Selected folders:\n");
-				for (const auto& path : selectedPaths) {
-					OutputDebugString(path);
-					OutputDebugStringA("\n");
-				}
-			}
-		}
-	}
-
-	// Release COM objects
-	pfd->Release();
-	CoUninitialize();
-
-	return 0;
-	
-
-	//TCHAR path[MAX_PATH];
-
-
-	//BROWSEINFO bi{ };
-	//bi.lpszTitle = TEXT("Browse for folder...");
-	//bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
-	//bi.lpfn = NULL;
-	////bi.lParam = (LPARAM)path_param;
-
-	//LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
-
-	//if (pidl != NULL)
-	//{
-	//	//get the name of the folder and put it in path
-	//	SHGetPathFromIDList(pidl, path);
-	//	OutputDebugString(path);
-	//	//free memory used
-	//	IMalloc* imalloc = 0;
-	//	if (SUCCEEDED(SHGetMalloc(&imalloc)))
-	//	{
-	//		imalloc->Free(pidl);
-	//		imalloc->Release();
-	//	}
-
-	//	return "NULL";
-	//}
-
-	return "";
-}
-
 bool PickFolder()
 {
 	HRESULT hr = CoInitialize(NULL);
@@ -232,17 +139,83 @@ void SetFileDialogOptions(IFileOpenDialog* pfd)
 void BrowseFolder(IFileOpenDialog* pfd)
 {
 	HRESULT hr = pfd->Show(NULL);
-	if (SUCCEEDED(hr)) {
-		IShellItem* result;
-		hr = pfd->GetResult(&result);
-		if (SUCCEEDED(hr)) {
-			PWSTR selectedFolderPath;
-			hr = result->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &selectedFolderPath);
-			if (SUCCEEDED(hr)) {
-				// todo: handle selected folder here
-				OutputDebugString(selectedFolderPath);
-				selectedFolder = selectedFolderPath;
+	if (FAILED(hr))
+		return;
+
+	IShellItem* result;
+	hr = pfd->GetResult(&result);
+	if (FAILED(hr))
+		return;
+	PWSTR selectedFolderPath;
+	hr = result->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &selectedFolderPath);
+	if (FAILED(hr))
+		return;
+	OutputDebugString(selectedFolderPath);
+	selectedFolder = selectedFolderPath;
+
+}
+
+void AddFileToZip(const wchar_t* zipFileName, const wchar_t* sourceFileName)
+{
+	struct zip* archive;
+	struct zip_source* source;
+
+	archive = zip_open(WcharToString(zipFileName).c_str(), ZIP_CREATE, NULL);
+	if (archive == NULL) {
+		perror("Failed to open zip archive");
+		return;
+	}
+
+	source = zip_source_file(archive, WcharToString(sourceFileName).c_str(), 0, 0);
+	if (source == NULL) {
+		perror("Failed to create zip source from file");
+		zip_close(archive);
+		return;
+	}
+
+
+	std::wstring filePath = sourceFileName;
+	size_t found = filePath.find(selectedFolder + L"\\");
+	if (found != std::wstring::npos) {
+		filePath.erase(found, selectedFolder.length() + 1);
+	}
+
+	if (zip_file_add(archive, WcharToString(filePath.c_str()).c_str(), source, 0) < 0) {
+		perror("Failed to add file to zip archive");
+		zip_source_free(source);
+		zip_close(archive);
+		return;
+	}
+	zip_close(archive);
+}
+
+void AddFolderToZip(const wchar_t* folderPath, const wchar_t* zipFileName) {
+	WIN32_FIND_DATA findFileData;
+	wchar_t searchPattern[MAX_PATH];
+
+	swprintf(searchPattern, sizeof(searchPattern) / sizeof(searchPattern[0]), L"%s\\*", folderPath);
+
+	HANDLE hFind = FindFirstFile(searchPattern, &findFileData);
+	if (hFind != INVALID_HANDLE_VALUE) {
+		do {
+			if (!(findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+				wchar_t filePath[MAX_PATH];
+				swprintf(filePath, sizeof(filePath) / sizeof(filePath[0]), L"%s\\%s", folderPath, findFileData.cFileName);
+				AddFileToZip(zipFileName, filePath);
+			} else if (wcscmp(findFileData.cFileName, L".") != 0 && wcscmp(findFileData.cFileName, L"..") != 0) {
+				wchar_t subFolderPath[MAX_PATH];
+					swprintf(subFolderPath, sizeof(subFolderPath) / sizeof(subFolderPath[0]), L"%s\\%s", folderPath, findFileData.cFileName);
+				AddFolderToZip(subFolderPath, zipFileName);
 			}
-		}
+		} while (FindNextFile(hFind, &findFileData) != 0);
+
+		FindClose(hFind);
 	}
 }
+
+std::string WcharToString(const wchar_t* data)
+{
+	std::wstring wideString(data);
+	return std::string(wideString.begin(), wideString.end());
+}
+

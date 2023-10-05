@@ -4,6 +4,8 @@
 #include <string>
 #include "shlobj_core.h"
 #include "shobjidl_core.h"
+#include <vector>
+#include <zip.h>
 
 // constants
 const wchar_t APPLICATION_NAME[] = L"ZipManager";
@@ -25,18 +27,20 @@ std::wstring selectedFolder;
 
 
 // functions
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR szCmdLine, int nCmdShow);
-
 LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lParam);
 
 WNDCLASSEX CreateMainWindowClass(HINSTANCE hInstance);
 
 HWND InstantiateMainWindow(HINSTANCE hInstance);
 
-std::string BrowseFolder(std::string saved_path);
-
 bool PickFolder();
 
 void SetFileDialogOptions(IFileOpenDialog* pfd);
 
 void BrowseFolder(IFileOpenDialog* pfd);
+
+void AddFileToZip(const wchar_t* zipFileName, const wchar_t* sourceFileName);
+
+void AddFolderToZip(const wchar_t* folderPath, const wchar_t* zipFileName);
+
+std::string WcharToString(const wchar_t* data);
