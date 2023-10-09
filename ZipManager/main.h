@@ -23,8 +23,7 @@ const int BUTTON_HEIGHT = 50;
 
 // variables
 std::wstring selectedFolder;
-
-
+std::wstring selectedZip;
 
 // functions
 LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lParam);
@@ -44,3 +43,7 @@ void AddFileToZip(const wchar_t* zipFileName, const wchar_t* sourceFileName);
 void AddFolderToZip(const wchar_t* folderPath, const wchar_t* zipFileName);
 
 std::string WcharToString(const wchar_t* data);
+
+void ExtractZip(const char* zipFileName, const char* outputFolder);
+
+bool PickZipToExtract();

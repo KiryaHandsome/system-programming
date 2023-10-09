@@ -1,5 +1,4 @@
 #include "main.h"
-#include <thread>
 
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR szCmdLine, int nCmdShow)
@@ -45,8 +44,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR szCmdLine, int nCmdSho
 		DispatchMessage(&message);
 	}
 	return message.wParam;
-
-
 }
 
 LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lParam)
@@ -63,9 +60,17 @@ LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lP
 			}
 			break;
 		}
-		case IDC_EXTRACT_BUTTON:
-			MessageBox(hWindow, TEXT("Extract button clicked!"), TEXT("Button Click"), MB_OK | MB_ICONINFORMATION);
+		case IDC_EXTRACT_BUTTON: {
+			bool isPicked = PickZipToExtract();
+			std::string outputFolderPath(selectedZip.begin(), selectedZip.end());
+			size_t dotPos = outputFolderPath.find_last_of(".");
+			std::string filePath(selectedZip.begin(), selectedZip.end());
+			if (dotPos != std::string::npos) {
+				outputFolderPath = outputFolderPath.substr(0, dotPos);
+			}
+			ExtractZip(filePath.c_str(), outputFolderPath.c_str());
 			break;
+		}
 		}
 		return 0;
 	}
@@ -75,10 +80,6 @@ LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lP
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
-	case WM_CREATE: {
-		// create buttons here
-		return 0;
-	}
 	default:
 		return DefWindowProc(hWindow, message, wParam, lParam);
 	}
@@ -173,7 +174,6 @@ void AddFileToZip(const wchar_t* zipFileName, const wchar_t* sourceFileName)
 		return;
 	}
 
-
 	std::wstring filePath = sourceFileName;
 	size_t found = filePath.find(selectedFolder + L"\\");
 	if (found != std::wstring::npos) {
@@ -202,15 +202,112 @@ void AddFolderToZip(const wchar_t* folderPath, const wchar_t* zipFileName) {
 				wchar_t filePath[MAX_PATH];
 				swprintf(filePath, sizeof(filePath) / sizeof(filePath[0]), L"%s\\%s", folderPath, findFileData.cFileName);
 				AddFileToZip(zipFileName, filePath);
-			} else if (wcscmp(findFileData.cFileName, L".") != 0 && wcscmp(findFileData.cFileName, L"..") != 0) {
+			}
+			else if (wcscmp(findFileData.cFileName, L".") != 0 && wcscmp(findFileData.cFileName, L"..") != 0) {
 				wchar_t subFolderPath[MAX_PATH];
-					swprintf(subFolderPath, sizeof(subFolderPath) / sizeof(subFolderPath[0]), L"%s\\%s", folderPath, findFileData.cFileName);
+				swprintf(subFolderPath, sizeof(subFolderPath) / sizeof(subFolderPath[0]), L"%s\\%s", folderPath, findFileData.cFileName);
 				AddFolderToZip(subFolderPath, zipFileName);
 			}
 		} while (FindNextFile(hFind, &findFileData) != 0);
 
 		FindClose(hFind);
 	}
+}
+
+void ExtractZip(const char* zipFileName, const char* outputFolder) {
+	struct zip* archive;
+
+	archive = zip_open(zipFileName, ZIP_RDONLY, NULL);
+	if (!archive) {
+		return;
+	}
+
+	int numEntries = zip_get_num_entries(archive, 0);
+	if (numEntries < 0) {
+		zip_close(archive);
+		return;
+	}
+
+	for (int i = 0; i < numEntries; i++) {
+		struct zip_stat entryStat;
+		if (zip_stat_index(archive, i, 0, &entryStat) == 0) {
+			std::string entryName(entryStat.name);
+			std::string outputPath;
+			if (entryName.find("\\") == 0) {
+				outputPath = std::string(outputFolder) + entryStat.name;
+			}
+			else {
+				outputPath = std::string(outputFolder) + '\\' + entryStat.name;
+			}
+
+			// Ensure the directory exists
+			size_t lastSlashPos = outputPath.find_last_of("\\");
+			if (lastSlashPos != std::string::npos) {
+				std::string dirPath = outputPath.substr(0, lastSlashPos);
+				SHCreateDirectoryExA(NULL, dirPath.c_str(), NULL);
+			}
+
+			zip_file* zipFile = zip_fopen_index(archive, i, 0);
+			if (zipFile) {
+				FILE* outputFile;
+				if (fopen_s(&outputFile, outputPath.c_str(), "wb") == 0) {
+					char buffer[1024];
+					int bytesRead;
+					while ((bytesRead = zip_fread(zipFile, buffer, sizeof(buffer))) > 0) {
+						fwrite(buffer, 1, bytesRead, outputFile);
+					}
+					fclose(outputFile);
+				}
+				zip_fclose(zipFile);
+			}
+			else if (entryStat.name[strlen(entryStat.name) - 1] == '\\') {
+				// This entry is a directory
+				CreateDirectoryA(outputPath.c_str(), NULL);
+			}
+		}
+	}
+	zip_close(archive);
+}
+
+bool PickZipToExtract()
+{
+	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+	if (FAILED(hr)) {
+		MessageBox(NULL, L"COM Initialization Failed", L"Error", MB_ICONERROR);
+		return false;
+	}
+
+	IFileDialog* pFileDialog = nullptr;
+	hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pFileDialog));
+	if (FAILED(hr)) {
+		MessageBox(NULL, L"Failed to create File Open Dialog", L"Error", MB_ICONERROR);
+		CoUninitialize();
+		return false;
+	}
+	COMDLG_FILTERSPEC fileTypes[] = { L"Zip Archives", L"*.zip" };
+	pFileDialog->SetFileTypes(ARRAYSIZE(fileTypes), fileTypes);
+	hr = pFileDialog->Show(NULL);
+	if (SUCCEEDED(hr)) {
+		IShellItem* pItem;
+		hr = pFileDialog->GetResult(&pItem);
+		if (SUCCEEDED(hr)) {
+			PWSTR filePath;
+			hr = pItem->GetDisplayName(SIGDN_FILESYSPATH, &filePath);
+			if (SUCCEEDED(hr)) {
+				std::wstring selectedFilePath(filePath);
+				selectedZip = selectedFilePath;
+				CoTaskMemFree(filePath);
+			}
+			pItem->Release();
+		}
+	}
+	pFileDialog->Release();
+	CoUninitialize();
+	if (FAILED(hr)) {
+		MessageBox(NULL, L"File Dialog Operation Failed", L"Error", MB_ICONERROR);
+		return false;
+	}
+	return true;
 }
 
 std::string WcharToString(const wchar_t* data)
