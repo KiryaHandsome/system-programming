@@ -57,18 +57,22 @@ LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lP
 				std::wstring folderPath(selectedFolder);
 				std::wstring zipFilePath = std::wstring(selectedFolder).append(L".zip");
 				AddFolderToZip(folderPath.c_str(), zipFilePath.c_str());
+				MessageBoxA(hWindow, "Zip created successfully!", "Success", MB_OK);
 			}
 			break;
 		}
 		case IDC_EXTRACT_BUTTON: {
 			bool isPicked = PickZipToExtract();
-			std::string outputFolderPath(selectedZip.begin(), selectedZip.end());
-			size_t dotPos = outputFolderPath.find_last_of(".");
-			std::string filePath(selectedZip.begin(), selectedZip.end());
-			if (dotPos != std::string::npos) {
-				outputFolderPath = outputFolderPath.substr(0, dotPos);
+			if (isPicked) {
+				std::string outputFolderPath(selectedZip.begin(), selectedZip.end());
+				size_t dotPos = outputFolderPath.find_last_of(".");
+				std::string filePath(selectedZip.begin(), selectedZip.end());
+				if (dotPos != std::string::npos) {
+					outputFolderPath = outputFolderPath.substr(0, dotPos);
+				}
+				ExtractZip(filePath.c_str(), outputFolderPath.c_str());
+				MessageBoxA(hWindow, "Files extracted successfully!", "Success", MB_OK);
 			}
-			ExtractZip(filePath.c_str(), outputFolderPath.c_str());
 			break;
 		}
 		}
