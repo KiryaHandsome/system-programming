@@ -91,15 +91,11 @@ LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lP
 			if (GetSystemPowerStatus(&powerStatus))
 			{
 				if (powerStatus.ACLineStatus == AC_LINE_ONLINE)
-				{
 					PrintMessage(L"Power adapter connected\r\n");
-				}
 				else
-				{
 					PrintMessage(L"Power adapter removed\r\n");
-				}
 			}
-			break;
+			return 0;
 		}
 		break;
 		}
@@ -121,6 +117,26 @@ LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lP
 			}
 			CloseClipboard();
 		}
+		break;
+	}
+	case WM_KEYUP:
+	{
+		int virtualKeyCode = (int)wParam;
+		std::string keyChar = std::string(1, MapVirtualKey(virtualKeyCode, MAPVK_VK_TO_CHAR));
+		if (isprint(keyChar[0]))
+			PrintMessage(L"Key up: " + std::wstring(keyChar.begin(), keyChar.end()) + L"\r\n");
+		else
+			PrintMessage(L"Key up!\r\n");
+		break;
+	}
+	case WM_KEYDOWN:
+	{
+		int virtualKeyCode = (int)wParam;
+		std::string keyChar = std::string(1, MapVirtualKey(virtualKeyCode, MAPVK_VK_TO_CHAR));
+		if (isprint(keyChar[0]))
+			PrintMessage(L"Key down: " + std::wstring(keyChar.begin(), keyChar.end()) + L"\r\n");
+		else
+			PrintMessage(L"Key down!\r\n");
 		break;
 	}
 	default:
