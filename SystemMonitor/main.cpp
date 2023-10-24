@@ -1,6 +1,5 @@
 #include "main.h"
 
-
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR szCmdLine, int nCmdShow)
 {
 	WNDCLASSEX mainWindowClass = CreateMainWindowClass(hInstance);
@@ -10,17 +9,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR szCmdLine, int nCmdSho
 	}
 
 	HWND mainWindow = InstantiateMainWindow(hInstance);
-
-	HWND archiveButton = CreateWindow(
-		L"BUTTON", L"Park Car",
-		WS_TABSTOP | WS_VISIBLE | WS_CHILD,
-		10, 10, BUTTON_WIDTH, BUTTON_HEIGHT,
-		mainWindow,
-		(HMENU)IDC_PARK_CAR_BUTTON,
-		hInstance,
-		NULL
-	);
-
 	editControl = CreateWindow(
 		L"EDIT",
 		L"",
@@ -38,10 +26,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR szCmdLine, int nCmdSho
 	ShowWindow(mainWindow, nCmdShow);
 	UpdateWindow(mainWindow);
 
-	semaphore = CreateSemaphore(NULL, PARK_PLACES_COUNT, PARK_PLACES_COUNT, NULL);
-	mutex = CreateMutexA(NULL, FALSE, "Mutex");
-	if (semaphore == NULL || mutex == NULL) {
-		return EXIT_FAILURE;
+	if (AddClipboardFormatListener(mainWindow))
+	{
+		OutputDebugStringA("clipboard listener connected");
 	}
 
 	MSG message;
@@ -50,28 +37,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR szCmdLine, int nCmdSho
 		TranslateMessage(&message);
 		DispatchMessage(&message);
 	}
-	return message.wParam;
 }
 
 LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message) {
-	case WM_COMMAND: {
-		switch (LOWORD(wParam)) {
-		case IDC_PARK_CAR_BUTTON: {
-			int* currentId = new int;
-			*currentId = ++id;
-			HANDLE newCar = CreateThread(NULL, 0, ParkCar, currentId, 0, NULL);
-			if (newCar == NULL) {
-				MessageBoxA(hWindow, "Thread not created", "Error", MB_OK);
-			}
-			break;
-		}
-		}
-		return 0;
-	}
 	case WM_CLOSE:
 		DestroyWindow(hWindow);
+		RemoveClipboardFormatListener(hWindow);
 		return 0;
 	case WM_DESTROY:
 		PostQuitMessage(0);
@@ -79,8 +52,76 @@ LRESULT CALLBACK WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lP
 	case WM_SIZE: {
 		RECT clientRect;
 		GetClientRect(hWindow, &clientRect);
-		MoveWindow(editControl, 20, 80, clientRect.right - 20, clientRect.bottom - 100, TRUE);
+		MoveWindow(editControl, 20, 20, clientRect.right - 40, clientRect.bottom - 40, TRUE);
 		return 0;
+	}
+	case WM_DISPLAYCHANGE:
+	{
+		int newWidth = LOWORD(lParam);
+		int newHeight = HIWORD(lParam);
+		PrintMessage(L"Display size was changed to " + std::to_wstring(newWidth) + L"x" + std::to_wstring(newHeight) + L"\r\n");
+		MoveWindow(hWindow, 20, 80, newWidth - 40, newHeight - 100, TRUE);
+		RECT clientRect;
+		GetClientRect(hWindow, &clientRect);
+		MoveWindow(editControl, 20, 20, clientRect.right - 40, clientRect.bottom - 40, TRUE);
+		break;
+	}
+	case WM_DEVICECHANGE:
+	{
+		switch (wParam)
+		{
+		case DBT_DEVICEARRIVAL: {
+			PrintMessage(L"Device connected to computer\r\n");
+			break;
+		}
+		case DBT_DEVICEREMOVECOMPLETE:
+		{
+			PrintMessage(L"Device removed from computer\r\n");
+			break;
+		}
+		}
+	}
+	case WM_POWERBROADCAST:
+	{
+		switch (wParam)
+		{
+		case PBT_APMPOWERSTATUSCHANGE:
+		{
+			SYSTEM_POWER_STATUS powerStatus;
+			if (GetSystemPowerStatus(&powerStatus))
+			{
+				if (powerStatus.ACLineStatus == AC_LINE_ONLINE)
+				{
+					PrintMessage(L"Power adapter connected\r\n");
+				}
+				else
+				{
+					PrintMessage(L"Power adapter removed\r\n");
+				}
+			}
+			break;
+		}
+		break;
+		}
+	}
+	case WM_CLIPBOARDUPDATE:
+	{
+		if (OpenClipboard(hWindow))
+		{
+			HANDLE hClipboardData = GetClipboardData(CF_TEXT);
+			if (hClipboardData)
+			{
+				char* pszData = static_cast<char*>(GlobalLock(hClipboardData));
+				if (pszData)
+				{
+					std::string data = pszData;
+					PrintMessage(L"Clipboard updated: " + std::wstring(data.begin(), data.end()) + L"\r\n");
+					GlobalUnlock(hClipboardData);
+				}
+			}
+			CloseClipboard();
+		}
+		break;
 	}
 	default:
 		return DefWindowProc(hWindow, message, wParam, lParam);
@@ -111,34 +152,9 @@ HWND InstantiateMainWindow(HINSTANCE hInstance)
 	);
 }
 
-void PrintMessage(std::string message)
-{
-	std::wstring wMessage(message.begin(), message.end());
-	WaitForSingleObject(mutex, INFINITE);
-	OutputDebugStringA(message.c_str());
-	SendMessage(editControl, EM_SETSEL, (WPARAM)-1, (LPARAM)-1);
-	SendMessage(editControl, EM_REPLACESEL, 0, (LPARAM)wMessage.c_str());
-	ReleaseMutex(mutex);
-}
 
-DWORD WINAPI ParkCar(LPVOID lpParam) {
-	int* carIdPtr = reinterpret_cast<int*>(lpParam);
-	std::string carId = std::to_string((*carIdPtr));
-	while (true) {
-		PrintMessage(carId + " car is trying to park...\n");
-		if (WaitForSingleObject(semaphore, 0) == WAIT_OBJECT_0) {
-			PrintMessage(carId + " car is parked\n");
-			Sleep(5000); // car on the park
-			PrintMessage(carId + " car left park\n");
-			ReleaseSemaphore(semaphore, 1, NULL);
-			break;
-		}
-		else { // there are no park places 
-			Sleep(500);
-			PrintMessage(carId + " there is no free places :( Please wait a bit...\n");
-		}
-	}
-	delete carIdPtr;
-	ExitThread(0);
-	return 0;
+void PrintMessage(std::wstring message)
+{
+	SendMessage(editControl, EM_SETSEL, (WPARAM)-1, (LPARAM)-1);
+	SendMessage(editControl, EM_REPLACESEL, 0, (LPARAM)message.c_str());
 }
